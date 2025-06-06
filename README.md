@@ -10,6 +10,8 @@ Un dépôt Git est ensuite initialisé. Grâce à un **webhook**, chaque `push` 
 
 Pour permettre une connexion entre GitHub et Jenkins en local, **Ngrok** est utilisé afin d’exposer Jenkins via un tunnel sécurisé accessible par GitHub.
 
+**Eslint** est également de la partie afin de permettre les bonnes pratiques.
+
 ## 🧱 1. Initialisation du projet
 
 Lancer manuellement le script `init-backend.sh` :
