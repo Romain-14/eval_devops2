@@ -39,6 +39,9 @@ cat > .eslintrc.json <<'EOF'
     "node": true,
     "jest": true
   },
+  "globals": {
+    "process": "readonly"
+  },
   "extends": "eslint:recommended",
   "parserOptions": {
     "ecmaVersion": "latest",
