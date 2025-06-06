@@ -25,12 +25,18 @@ router.get("/", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-	const newBook = req.body;
-	const insertedId = null; // sera récupéré par la requete sql
-    if(!insertedId){
-        res.status(500).json({message: "Error while inserting data"})
-    }
-	return res.status(201).json({ id: insertedId, ...newBook });
+	const { title, author, user_id, booktype_id } = req.body;
+
+	if (!title || !author || !user_id || !booktype_id) {
+		return res.status(400).json({ error: "Missing required fields" });
+	}
+
+	const insertedBook = {
+		id: 4,
+		...req.body,
+	};
+
+	return res.status(201).json(insertedBook);
 });
 
 export default router;

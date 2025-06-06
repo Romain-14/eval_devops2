@@ -26,4 +26,17 @@ describe("Books API", () => {
 			...newBook,
 		});
 	});
+
+	it("POST /books should fail if required fields are missing", async () => {
+		const incompleteBook = {
+			title: "Bahamut, the new chaos",
+		};
+
+		const res = await request(app).post("/books").send(incompleteBook);
+
+		expect(res.statusCode).toBe(400); 
+		expect(res.body).toMatchObject({
+			error: expect.any(String),
+		});
+	});
 });
