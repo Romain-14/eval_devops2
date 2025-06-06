@@ -1,83 +1,123 @@
-# Evaluation module 2 - DevOps
+# 🎯 Évaluation Module 2 - DevOps
 
-Création de la structure backend
-Lancer manuellement le script `init-backend.sh` :
+Projet d’évaluation visant à mettre en place une chaîne d’intégration continue (CI) simple avec Jenkins pour un backend Node.js.
+
+---
+
+## 🧱 Étape 1 – Génération de la structure backend
+
+Lancer le script `init-backend.sh` pour initialiser la structure et les fichiers :
 
 ```sh
 script/init-backend.sh
 ```
 
-> Le script génère le contenu des fichiers !
+> Le script génère automatiquement les fichiers nécessaires (structure, dépendances, tests, Dockerfile…).
 
-Lancer le serveur en local maintenant avec `npm run dev`.
-Dans le terminal :
-> Backend running at [http://localhost:3000]
+Une fois terminé, lance le serveur pour tester rapidement :
 
-Couper le serveur.
-Testons notre test :p
+```sh
+npm run dev
+```
 
-Rentrer la commande :
-> npm test
+Si tout fonctionne, tu verras dans le terminal :
+> `Backend running at http://localhost:3000`
 
-La sortie en terminal  :
+---
+
+## 🧪 Étape 2 – Test manuel
+
+Coupe le serveur (`Ctrl + C`), puis exécute les tests unitaires :
+
+```sh
+npm test
+```
+
+Résultat attendu :
 
 ```sh
 PASS  src/tests/ping.test.js
   GET /ping
-    √ should return pong (32 ms)
+    ✓ should return pong (32 ms)
 
 Test Suites: 1 passed, 1 total                         
-Tests:       1 passed, 1 total                                         
+Tests:       1 passed, 1 total                         
 Snapshots:   0 total
 Time:        3.362 s
 ```
 
-> Coupons le terminal `ctrl + c` ; la suite se passera dans Jenkins !
+> Parfait, maintenant direction Jenkins pour automatiser tout ça !
 
-7. D'abord il faut build l'infrastructure complète
+---
+
+## 🐳 Étape 3 – Lancer l’infrastructure Docker
+
+Il est temps de builder tous les services nécessaires (Jenkins, DB, backend...) :
 
 ```sh
-docker-compose up --build -d
+docker-compose build backend
+docker compose up -d
 ```
 
-8. Dans Jenkins [http://localhost:8080], créer un pipeline pour les tests.
+Vérifie ensuite que les conteneurs sont bien lancés :
+
+```sh
+docker ps
+```
+
+Tu devrais voir :
+
+- `jenkins-docker`
+- `my-jenkins`
+- `backend`
+- `db`
+
+---
+
+## 🛠️ Étape 4 – Configuration du pipeline Jenkins
+
+1. Rendez-vous sur [http://localhost:8080](http://localhost:8080)  
+2. Connecte-toi, puis :
+   - Clique sur **"Nouveau Item"**
+   - Choisis **"Pipeline"**
+   - Nomme le projet (ex. : `test-backend`)
+   - Dans l’onglet **Pipeline**, colle le script suivant :
 
 ```groovy
 pipeline {
   agent any
 
-  environment {
-    COMPOSE_PROJECT_NAME = "eval"
-  }
-
   stages {
-    stage('Build Backend + DB') {
+    stage('Clone') {
       steps {
-        dir('/home/jenkins/_eval') {
-          sh 'docker-compose up --build -d backend db'
+        git url: 'https://github.com/Romain-14/eval_devops2.git', branch: 'main'
+      }
+    }
+    stage('Install') {
+      steps {
+        dir('backend') {
+          sh 'npm install'
         }
       }
     }
-
-    stage('Test /ping') {
+    stage('Test route ping') {
       steps {
-        dir('/home/jenkins/_eval') {
-          sh '''
-            sleep 5
-            curl -s -o /dev/null -w "%{http_code}" http://backend:3000/ping | grep 200
-          '''
-        }
-      }
-    }
-
-    stage('Tests unitaires') {
-      steps {
-        dir('/home/jenkins/_eval/backend') {
-          sh 'docker exec backend npm test'
+        dir('backend') {
+          sh 'npm test'
         }
       }
     }
   }
 }
-
 ```
+
+3. Clique sur **"Build Now"**  
+4. Tu devrais voir les étapes s’exécuter avec succès ✅
+
+---
+
+## ✅ Résultat attendu
+
+Ton pipeline Jenkins exécute désormais automatiquement les tests après avoir cloné le repo.  
+
+
