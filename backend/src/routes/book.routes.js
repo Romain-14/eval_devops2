@@ -8,7 +8,7 @@ router.get("/", (req, res) => {
 			id: 1,
 			title: "Bleach",
 			author: "Tite Kubo",
-			created_at: new Date(),
+			created_at: new Date().toISOString(),
 			user_id: 1,
 			booktype_id: 2,
 		},
@@ -16,7 +16,7 @@ router.get("/", (req, res) => {
 			id: 1,
 			title: "Dragon Ball",
 			author: "Akira Toriyama",
-			created_at: new Date(),
+			created_at: new Date().toISOString(),
 			user_id: 3,
 			booktype_id: 2,
 		},
@@ -25,9 +25,10 @@ router.get("/", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-    const insertedId = 4;
+	const newBook = req.body;
+	const insertedId = 4; // sera récupéré par la requete sql
 
-    return res.status(201).json(insertedId);
+	return res.status(201).json({ id: insertedId, ...newBook });
 });
 
 export default router;

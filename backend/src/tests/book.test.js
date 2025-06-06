@@ -14,13 +14,16 @@ describe("Books API", () => {
 			id: 1,
 			title: "Bahamut, the new chaos",
 			author: "Romain Fournier",
-			created_at: new Date(),
+			created_at: new Date().toISOString(),
 			user_id: 5,
 			booktype_id: 3,
 		};
 		const res = await request(app).post("/books").send(newBook);
 
 		expect(res.statusCode).toBe(201);
-		expect(res.body).toMatchObject(newBook);
+		expect(res.body).toMatchObject({
+			id: 4,
+			...newBook,
+		});
 	});
 });
