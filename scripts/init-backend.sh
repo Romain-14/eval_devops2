@@ -31,24 +31,25 @@ fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
 npm install express dotenv mysql2 cors
 npm install -D jest supertest cross-env nodemon eslint
 
-# Création du fichier .eslintrc.json
-cat > .eslintrc.json <<'EOF'
-{
-  "env": {
-    "es2021": true,
-    "node": true,
-    "jest": true
-  },
-  "globals": {
-    "process": "readonly"
-  },
-  "extends": "eslint:recommended",
-  "parserOptions": {
-    "ecmaVersion": "latest",
-    "sourceType": "module"
-  },
-  "rules": {}
-}
+# Création du fichier eslint.config.js (ESLint v9+)
+cat > eslint.config.js <<'EOF'
+export default [
+  {
+    files: ["**/*.js"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: {
+        process: "readonly"
+      }
+    },
+    linterOptions: {
+      reportUnusedDisableDirectives: true
+    },
+    plugins: {},
+    rules: {}
+  }
+];
 EOF
 
 echo "📄 Création des fichiers avec contenu..."
