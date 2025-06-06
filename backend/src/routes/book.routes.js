@@ -26,7 +26,7 @@ router.get("/", (req, res) => {
 
 router.post("/", (req, res) => {
 	const newBook = req.body;
-	const insertedId = 4; // sera récupéré par la requete sql
+	const insertedId = null; // sera récupéré par la requete sql
 
 	return res.status(201).json({ id: insertedId, ...newBook });
 });
