@@ -22,13 +22,15 @@ pkg.type = 'module';
 pkg.scripts = {
   start: 'node src/server.js',
   dev: 'nodemon src/server.js',
-  test: \"cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config=jest.config.mjs\"
+  test: \"cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config=jest.config.mjs\",
+  lint: 'eslint .'
 };
 fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
 "
 
 npm install express dotenv mysql2 cors
-npm install -D jest supertest cross-env nodemon
+npm install -D jest supertest cross-env nodemon eslint
+npx eslint --init
 
 echo "📄 Création des fichiers avec contenu..."
 

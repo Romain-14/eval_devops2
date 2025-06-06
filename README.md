@@ -1,33 +1,42 @@
-# 🎯 Évaluation Module 2 - DevOps
+# 📦 Évaluation DevOps – API Backend (Node Express + MySQL) + Jenkins CI/CD
 
-Projet d’évaluation visant à mettre en place une chaîne d’intégration continue (CI) simple avec Jenkins pour un backend Node.js.
+Ce projet a pour objectif de développer une API backend avec un pipeline CI/CD complet, fonctionnant **en local**.
 
----
+L’environnement est entièrement conteneurisé via **Docker**, permettant d’isoler les différents services.
 
-## 🧱 Étape 1 – Génération de la structure backend
+Un script d’initialisation (`/scripts/init-backend.sh`) est exécuté pour générer la structure du projet : dossiers, fichiers et leur contenu. Une fois le backend prêt, un test Jest simple (`/ping`) est mis en place et déclenché via Jenkins.
 
-Lancer le script `init-backend.sh` pour initialiser la structure et les fichiers :
+Un dépôt Git est ensuite initialisé. Grâce à un **webhook**, chaque `push` sur ce dépôt déclenche automatiquement le job Jenkins `test-backend`.
+
+Pour permettre une connexion entre GitHub et Jenkins en local, **Ngrok** est utilisé afin d’exposer Jenkins via un tunnel sécurisé accessible par GitHub.
+
+## 🧱 1. Initialisation du projet
+
+Lancer manuellement le script `init-backend.sh` :
 
 ```sh
 script/init-backend.sh
 ```
 
-> Le script génère automatiquement les fichiers nécessaires (structure, dépendances, tests, Dockerfile…).
-
-Une fois terminé, lance le serveur pour tester rapidement :
-
-```sh
-npm run dev
-```
-
-Si tout fonctionne, tu verras dans le terminal :
-> `Backend running at http://localhost:3000`
+> Ce script initialise les fichiers nécessaires dans le dossier `backend`.
 
 ---
 
-## 🧪 Étape 2 – Test manuel
+## 🚀 2. Démarrage en local
 
-Coupe le serveur (`Ctrl + C`), puis exécute les tests unitaires :
+```sh
+cd backend
+npm run dev
+```
+
+Une fois lancé :
+> `Backend running at http://localhost:3000`
+
+Stopper ensuite le serveur avec `Ctrl + C`.
+
+---
+
+## 🧪 3. Lancer les tests localement
 
 ```sh
 npm test
@@ -38,50 +47,32 @@ Résultat attendu :
 ```sh
 PASS  src/tests/ping.test.js
   GET /ping
-    ✓ should return pong (32 ms)
+    √ should return pong (32 ms)
 
 Test Suites: 1 passed, 1 total                         
-Tests:       1 passed, 1 total                         
+Tests:       1 passed, 1 total                                         
 Snapshots:   0 total
 Time:        3.362 s
 ```
 
-> Parfait, maintenant direction Jenkins pour automatiser tout ça !
-
 ---
 
-## 🐳 Étape 3 – Lancer l’infrastructure Docker
-
-Il est temps de builder tous les services nécessaires (Jenkins, DB, backend...) :
+## 🐳 4. Construction Docker et lancement de l'infra
 
 ```sh
 docker-compose build backend
 docker compose up -d
 ```
 
-Vérifie ensuite que les conteneurs sont bien lancés :
-
-```sh
-docker ps
-```
-
-Tu devrais voir :
-
-- `jenkins-docker`
-- `my-jenkins`
-- `backend`
-- `db`
-
 ---
 
-## 🛠️ Étape 4 – Configuration du pipeline Jenkins
+## ⚙️ 5. Configuration Jenkins
 
-1. Rendez-vous sur [http://localhost:8080](http://localhost:8080)  
-2. Connecte-toi, puis :
-   - Clique sur **"Nouveau Item"**
-   - Choisis **"Pipeline"**
-   - Nomme le projet (ex. : `test-backend`)
-   - Dans l’onglet **Pipeline**, colle le script suivant :
+Aller sur : [http://localhost:8080](http://localhost:8080)
+
+Créer un **nouveau pipeline** nommé `test-backend`.
+
+Ajouter ce script dans le **Pipeline Script** :
 
 ```groovy
 pipeline {
@@ -111,13 +102,58 @@ pipeline {
 }
 ```
 
-3. Clique sur **"Build Now"**  
-4. Tu devrais voir les étapes s’exécuter avec succès ✅
+---
+
+## 🌐 6. GitHub Webhook via Ngrok
+
+
+### a. Démarrer Ngrok
+
+```sh
+ngrok http 8080
+```
+
+Repérer l’URL HTTPS du type :
+
+```sh
+https://xxxxx.ngrok-free.app
+# Il faudra rajouter /github-webhook/ à la fin de l'url
+```
+
+### b. Configurer le webhook GitHub
+
+Créer un repo git si pas déjà fait, et initialiser-push votre projet local.
+
+1. Aller dans les **Settings** du repo GitHub
+2. Menu **Webhooks**
+3. Ajouter un nouveau webhook :
+   - Payload URL : `https://xxxxx.ngrok-free.app/github-webhook/`
+   - Content type : `application/json`
+   - Events : `Just the push event`
+   - Secret : (laissez vide ou définissez-en une)
+
+---
+
+## 🔁 7. Tester le pipeline en CI
+
+1. Commit et push une modification sur `main`
+2. Aller dans Jenkins, le job doit s’exécuter automatiquement
+3. Voir les logs pour valider que le test `ping` passe
 
 ---
 
 ## ✅ Résultat attendu
 
-Ton pipeline Jenkins exécute désormais automatiquement les tests après avoir cloné le repo.  
+```sh
+> backend@1.0.0 test
+> cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config=jest.config.mjs
 
+PASS src/tests/ping.test.js
+  GET /ping
+    ✓ should return pong
 
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+```
+
+---
